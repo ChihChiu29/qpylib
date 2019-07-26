@@ -7,6 +7,7 @@ import numpy
 from qpylib import numpy_util
 
 
+# Deprecated; use numpy_util.TestUtil instead.
 class NumpyTestCase(unittest.TestCase):
 
   def assertArrayEq(self, array1: numpy.ndarray, array2: numpy.ndarray):

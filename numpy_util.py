@@ -55,3 +55,14 @@ def Replace(
   unchanged_values = source_values * (1 - mask)
   changed_values = mask * numpy.expand_dims(new_values, axis=new_values.ndim)
   return unchanged_values + changed_values
+
+
+class TestUtil:
+  
+  @staticmethod
+  def AssertArrayEqual(array1: numpy.ndarray, array2: numpy.ndarray):
+
+    if numpy.array_equal(array1, array2):
+      pass
+    else:
+      raise AssertionError('%s does not equal to %s' % (array1, array2))
