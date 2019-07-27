@@ -38,3 +38,7 @@ def vlog(
     caller.filename.split('/')[-1],
     caller.lineno)
   print(prefix + (msg % args))
+
+
+def printf(msg: t.Text, *args):
+  vlog(0, msg, *args)
