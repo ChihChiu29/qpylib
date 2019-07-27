@@ -58,11 +58,18 @@ def Replace(
 
 
 class TestUtil:
-  
+
   @staticmethod
   def AssertArrayEqual(array1: numpy.ndarray, array2: numpy.ndarray):
 
     if numpy.array_equal(array1, array2):
       pass
     else:
-      raise AssertionError('%s does not equal to %s' % (array1, array2))
+      try:
+        diff = array1 - array2
+        raise AssertionError(
+          '\n%s\ndoes not equal to:\n%s\ndiff:\n%s' % (array1, array2, diff))
+      except ValueError:
+        raise AssertionError(
+          '\n%s\ndoes not equal to:\n%s\nshape does not match either' % (
+            array1, array2))
