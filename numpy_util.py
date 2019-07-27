@@ -57,6 +57,26 @@ def Replace(
   return unchanged_values + changed_values
 
 
+def EncodePositionsToOneHotArray(
+    positions: numpy.ndarray,
+    one_hot_array_size: int,
+) -> numpy.ndarray:
+  """Converts an array of position indices to one-hot representation.
+  
+  For example:
+    EncodePositionsToOneHotArray(numpy.array([1, 2]), 3) gives:
+    numpy.array([[0, 1, 0], [0, 0, 1]])
+  
+  Args:
+    positions: a 1-d array of position indices.
+    one_hot_array_size: the size of each one-hot array.
+  """
+  num_positions = len(positions)
+  result = numpy.zeros((num_positions, one_hot_array_size))
+  result[numpy.arange(num_positions), positions] = 1
+  return result
+
+
 class TestUtil:
 
   @staticmethod

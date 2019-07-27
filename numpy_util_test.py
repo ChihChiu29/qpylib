@@ -17,10 +17,10 @@ class NumpyTestCase(unittest.TestCase):
       self.fail('%s does not equal to %s' % (array1, array2))
 
 
-class NumpyUtilTests(NumpyTestCase):
+class NumpyUtilTests(unittest.TestCase):
 
   def test_selectReduce_2d(self):
-    self.assertArrayEq(
+    numpy_util.TestUtil.AssertArrayEqual(
       numpy.array([2, 4]),
       numpy_util.SelectReduce(
         numpy.array([
@@ -33,14 +33,14 @@ class NumpyUtilTests(NumpyTestCase):
         ])))
 
   def test_selectReduce_1d(self):
-    self.assertArrayEq(
+    numpy_util.TestUtil.AssertArrayEqual(
       numpy.array([-0.9]),
       numpy_util.SelectReduce(
         numpy.array([[-0.9, 0, 0]]),
         numpy.array([[1, 0, 0]])))
 
   def test_replace(self):
-    self.assertArrayEq(
+    numpy_util.TestUtil.AssertArrayEqual(
       numpy.array([
         [1, 7, 3],
         [8, 5, 6],
@@ -58,7 +58,7 @@ class NumpyUtilTests(NumpyTestCase):
       ))
 
   def test_replace_highDimension(self):
-    self.assertArrayEq(
+    numpy_util.TestUtil.AssertArrayEqual(
       numpy.array([
         [
           [1, 10, 1],
@@ -95,3 +95,8 @@ class NumpyUtilTests(NumpyTestCase):
           [12, 13],
         ]),
       ))
+
+  def test_EncodePositionsToOneHotArray(self):
+    numpy_util.TestUtil.AssertArrayEqual(
+      numpy.array([[0, 1, 0], [0, 0, 1]]),
+      numpy_util.EncodePositionsToOneHotArray(numpy.array([1, 2]), 3))
