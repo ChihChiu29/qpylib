@@ -1,5 +1,5 @@
 """Helpers for working with numpy."""
-
+import keras
 import numpy
 
 from qpylib import t
@@ -73,3 +73,17 @@ class TestUtil:
         raise AssertionError(
           '\n%s\ndoes not equal to:\n%s\nshape does not match either' % (
             array1, array2))
+
+  @staticmethod
+  def AssertModelWeightsEqual(model1: keras.Model, model2: keras.Model):
+    weights1 = model1.get_weights()
+    weights2 = model2.get_weights()
+    if len(weights1) != len(weights2):
+      raise AssertionError('model 1 has %d layers but model 2 has %d layers' % (
+        len(weights1), len(weights2)))
+    for idx in range(len(weights1)):
+      try:
+        TestUtil.AssertArrayEqual(weights1[idx], weights2[idx])
+      except AssertionError as e:
+        raise AssertionError('model weights mismatch for layer %d: %s' % (
+          idx, e))
