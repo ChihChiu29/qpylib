@@ -41,4 +41,9 @@ def vlog(
 
 
 def printf(msg: t.Text, *args):
-  vlog(0, msg, *args)
+  caller = inspect.getframeinfo(inspect.stack()[1][0])
+  prefix = '[%s] %s:%s ' % (
+    datetime.datetime.now().strftime('%H:%M:%S'),
+    caller.filename.split('/')[-1],
+    caller.lineno)
+  print(prefix + (msg % args))
