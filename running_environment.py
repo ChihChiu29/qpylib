@@ -1,10 +1,7 @@
 """Functions related to the running environment."""
 import os
 
-# Mutable global storage.
 from tensorflow.python.client import device_lib
-
-_ENV = {}
 
 _CUDA_VISIBLE_DEVICES_KEY = 'CUDA_VISIBLE_DEVICES'
 
