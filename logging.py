@@ -2,6 +2,7 @@
 
 import datetime
 import inspect
+import threading
 from logging import *
 
 from qpylib import t
@@ -33,7 +34,8 @@ def vlog(
     return
 
   caller = inspect.getframeinfo(inspect.stack()[1][0])
-  prefix = '[%s] %s:%s ' % (
+  prefix = '(%s)[%s] %s:%s ' % (
+    threading.get_ident(),
     datetime.datetime.now().strftime('%H:%M:%S'),
     caller.filename.split('/')[-1],
     caller.lineno)
@@ -42,7 +44,8 @@ def vlog(
 
 def printf(msg: t.Text, *args):
   caller = inspect.getframeinfo(inspect.stack()[1][0])
-  prefix = '[%s] %s:%s ' % (
+  prefix = '(%s)[%s] %s:%s ' % (
+    threading.get_ident(),
     datetime.datetime.now().strftime('%H:%M:%S'),
     caller.filename.split('/')[-1],
     caller.lineno)
