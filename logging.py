@@ -34,7 +34,7 @@ def vlog(
     return
 
   caller = inspect.getframeinfo(inspect.stack()[1][0])
-  prefix = '(%s)[%s] %s:%s ' % (
+  prefix = '(TID %s)[%s] %s:%s ' % (
     threading.get_ident(),
     datetime.datetime.now().strftime('%H:%M:%S'),
     caller.filename.split('/')[-1],
@@ -44,7 +44,7 @@ def vlog(
 
 def printf(msg: t.Text, *args):
   caller = inspect.getframeinfo(inspect.stack()[1][0])
-  prefix = '(%s)[%s] %s:%s ' % (
+  prefix = '(TID %s)[%s] %s:%s ' % (
     threading.get_ident(),
     datetime.datetime.now().strftime('%H:%M:%S'),
     caller.filename.split('/')[-1],
