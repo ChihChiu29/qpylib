@@ -3,7 +3,8 @@ import json
 
 from PIL import Image
 
-from qpylib import t, image
+from qpylib import image
+from qpylib import t
 from qpylib.date_n_time import timing
 from qpylib.uidriver import chrome_driver
 
@@ -24,12 +25,14 @@ def GoToUrl(
   The page content before and after the change are compared to make sure
   the change indeed happens.
   """
-  get_body_text_js = 'document.body.innerText;'
+  get_body_text_js = 'document.body ? document.body.innerText : "";'
   before_text = comm.RunJs_GetValue(get_body_text_js)
   comm.RunJs_GetValue('window.location="%s"' % url)
 
   UiWait().UntilValue(
-    lambda x: x != before_text, comm.RunJs_GetValue, get_body_text_js)
+    lambda x: (x != '' and x != before_text),
+    comm.RunJs_GetValue,
+    get_body_text_js)
 
 
 def GetWindowScrollValues(
