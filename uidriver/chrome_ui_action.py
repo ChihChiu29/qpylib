@@ -100,3 +100,13 @@ def TakeScreenshot(
     }
   result = comm.RunCommand(cmd)
   return image.EncodedPNGToImage(result['result']['data'])
+
+
+def ScrollToBottom(comm: chrome_driver.ChromeCommunicator, ) -> None:
+  """Scroll to page bottom.
+
+  Sometimes Chrome UI doesn't seem to be changed by this action. However if
+  there are page continuations, those seems to be triggered by this.
+  """
+  comm.RunJs(
+    'window.scrollTo(0, document.body.scrollHeight);')
