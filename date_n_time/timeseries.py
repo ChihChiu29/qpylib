@@ -101,6 +101,12 @@ class TimeSeries:
       df = df.rolling(rolling, center=True).mean()
     return df
 
+  def ShiftTime(self, num_of_seconds: int):
+    """Returns a copy with shifted time."""
+    return TimeSeries(
+      [t + num_of_seconds for t in self.GetTimeArray()],
+      self.GetValueArray())
+
   def Rolling(self, rolling: int) -> 'TimeSeries':
     """Returns a rolling timeseries."""
     return FromDataFrame(self.ToDataFrame(rolling=rolling).dropna())
