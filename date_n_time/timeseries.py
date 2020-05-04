@@ -12,7 +12,7 @@ from qpylib import plot_util
 from qpylib import t
 from qpylib.date_n_time import date
 
-DEFAULT_FIGURE_DIMENSION = (12, 6)
+DEFAULT_FIGURE_DIMENSION = (18, 10)
 
 
 class TimeSeries:
@@ -31,8 +31,6 @@ class TimeSeries:
     self._t = np.array([pair[0] for pair in series])
     self._y = np.array([pair[1] for pair in series])
     self._interp = interpolate.interp1d(self._t, self._y)
-
-    self._use_new_figure = True
 
   def GetTimeArray(self) -> np.ndarray:
     return self._t.copy()
@@ -97,10 +95,22 @@ class TimeSeries:
   def GetMaxDatetime(self) -> datetime.datetime:
     return datetime.datetime.fromtimestamp(self.GetMaxTimestamp())
 
-  def ToDataFrame(self) -> pandas.DataFrame:
-    return pandas.DataFrame([self._t, self._y]).transpose()
+  def ToDataFrame(self, rolling: int = None) -> pandas.DataFrame:
+    df = pandas.DataFrame([self._t, self._y]).transpose()
+    if rolling:
+      df = df.rolling(rolling, center=True).mean()
+    return df
 
-  def Plot(self, rolling:int=None, show:bool=True, *args, **kwargs):
+  def Rolling(self, rolling: int) -> 'TimeSeries':
+    """Returns a rolling timeseries."""
+    return FromDataFrame(self.ToDataFrame(rolling=rolling).dropna())
+
+  def Plot(
+    self,
+    rolling: int = None,
+    new_figure: bool = False,
+    show: bool = True,
+    **kwargs):
     """Plots the timeseries in the current figure.
 
     Args:
@@ -108,19 +118,21 @@ class TimeSeries:
       show: whether to show the figure (otherwise more plots can be done to the
         same figure).
     """
-    if self._use_new_figure:
+    if new_figure:
       pyplot.figure(figsize=DEFAULT_FIGURE_DIMENSION)
-      self._use_new_figure = False
-    if rolling:
-      df = self.ToDataFrame().rolling(rolling, center=True).mean()
-      pyplot.plot(df[0], df[1], *args, **kwargs)
-    else:
-      pyplot.plot(self._t, self._y, *args, **kwargs)
+
+    df = self.ToDataFrame(rolling=rolling)
+    pyplot.plot(df[0], df[1], **kwargs)
 
     if show:
       plot_util.AddTimeTicker(self._t[0], self._t[-1])
+      pyplot.legend()
       pyplot.show()
-      self._use_new_figure = True
+
+
+def FromDataFrame(df: pandas.DataFrame) -> TimeSeries:
+  """Construct a timeseries from 1st and 2nd columns of a DataFrame."""
+  return TimeSeries(df.iloc[:, 0], df.iloc[:, 1])
 
 
 def CalculateCorrelation(ts1: TimeSeries, ts2: TimeSeries) -> float:
