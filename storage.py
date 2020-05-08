@@ -6,8 +6,12 @@ file, use this module. For directory convention see tools.settings module.
 """
 
 import os
+import pandas
+import pathlib
 import sqlite3
 
+from qpylib import logging
+from qpylib import storage
 from qpylib.t import *
 
 
@@ -223,3 +227,35 @@ def OpenSQLiteConnection(
     database_file_path = ':memory:'
   return SQLiteConnection(
     sqlite3.connect(database_file_path), debug_print=debug_print)
+
+
+class DataFrameStorage:
+  """Helps to read and save data frames for a given project."""
+  
+  def __init__(self, project_name: Text):
+    self._project = project_name
+    
+    pathlib.Path(storage.GetDataDirPath(self._project)).mkdir(
+        parents=True, exist_ok=True)
+    
+  def Save(self, df: pandas.DataFrame, filename: Text):
+    full_path = self._GetFullPath(filename)
+    logging.info('saving to: %s', full_path)
+    df.to_json(full_path)
+    
+  
+  def Load(self, filename: Text) -> pandas.DataFrame:
+    full_path = self._GetFullPath(filename)
+    logging.info('reading from: %s', full_path)
+    return pandas.read_json(full_path)
+  
+  
+  def Exists(self, filename: Text) -> bool:
+    full_path = self._GetFullPath(filename)
+    result = os.path.exists(full_path)
+    logging.info('%s exists: %s', full_path, result)
+    return result
+
+
+  def _GetFullPath(self, filename: Text) -> Text:
+    return storage.GetDataDirPath(os.path.join(self._project, filename))
