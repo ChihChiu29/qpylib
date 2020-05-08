@@ -30,7 +30,7 @@ def GetTrends(keywords: Iterable[Text], category: int=None) -> pandas.DataFrame:
   _PYTREND.build_payload(kw_list=list(keywords), cat=category)
   raw_date_df = _PYTREND.interest_over_time().reset_index()
   df = pandas.DataFrame()
-  df['timestamp'] = raw_date_df['date'].apply(lambda x: x.timestamp())
+  df['ts'] = raw_date_df['date'].apply(lambda x: x.timestamp())
   df['value'] = raw_date_df.iloc[:, 1]
   return df
 
