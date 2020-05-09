@@ -1,5 +1,6 @@
 """Easy-to-use timeseries."""
 import datetime
+from typing import Tuple
 
 import numpy
 import numpy as np
@@ -104,23 +105,23 @@ class TimeSeries:
   def ShiftTime(self, num_of_seconds: int):
     """Returns a copy with shifted time."""
     return TimeSeries(
-      [t + num_of_seconds for t in self.GetTimeArray()],
-      self.GetValueArray())
+      [tt + num_of_seconds for tt in self.GetTimeArray()], self.GetValueArray())
 
   def Rolling(self, rolling: int) -> 'TimeSeries':
     """Returns a rolling timeseries."""
     return FromDataFrame(self.ToDataFrame(rolling=rolling).dropna())
 
   def Plot(
-    self,
-    rolling: int = None,
-    new_figure: bool = False,
-    show: bool = True,
-    **kwargs):
+      self,
+      rolling: int = None,
+      new_figure: bool = False,
+      show: bool = True,
+      **kwargs):
     """Plots the timeseries in the current figure.
 
     Args:
       rolling: plot with rolling average.
+      new_figure: whether to draw in a new figure.
       show: whether to show the figure (otherwise more plots can be done to the
         same figure).
     """
@@ -139,6 +140,22 @@ class TimeSeries:
 def FromDataFrame(df: pandas.DataFrame) -> TimeSeries:
   """Construct a timeseries from 1st and 2nd columns of a DataFrame."""
   return TimeSeries(df.iloc[:, 0], df.iloc[:, 1])
+
+
+def RestrictToCommonTimeRange(
+    ts1: TimeSeries,
+    ts2: TimeSeries,
+) -> Tuple[TimeSeries, TimeSeries]:
+  """Returns copies of ts1 and ts2, restricted to common time range."""
+  bigger_min_timestamp = max(ts1.GetMinTimestamp(),
+                             ts2.GetMinTimestamp())
+  smaller_max_timestamp = min(ts1.GetMaxTimestamp(),
+                              ts2.GetMaxTimestamp())
+  ts1 = ts1.RestrictToRangeByTimestamp(bigger_min_timestamp,
+                                       smaller_max_timestamp)
+  ts2 = ts2.RestrictToRangeByTimestamp(bigger_min_timestamp,
+                                       smaller_max_timestamp)
+  return ts1, ts2
 
 
 def CalculateCorrelation(ts1: TimeSeries, ts2: TimeSeries) -> float:
