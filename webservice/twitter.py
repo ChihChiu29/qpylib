@@ -12,7 +12,9 @@ def Search(
 ) -> List[GetOldTweets3.models.Tweet.Tweet]:
   """Search tweets.
 
-  Reference: https://libraries.io/pypi/GetOldTweets3
+  Reference:
+  * https://libraries.io/pypi/GetOldTweets3
+  * https://github.com/Jefferson-Henrique/GetOldTweets-python
 
   Args:
     query: the search query.
