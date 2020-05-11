@@ -248,7 +248,11 @@ class AbstractStorage(abc.ABC):
   def Load(self, filename: Text) -> Any:
     """Loads from an existing file or None; type depends on subclass."""
     if self.Exists(filename):
-      return self._LoadImpl(filename)
+      try:
+        return self._LoadImpl(filename)
+      except EOFError as e:
+        logging.warning(e)
+        return None
     return None
 
   @abc.abstractmethod
@@ -292,10 +296,10 @@ class PickleStorage(AbstractStorage):
   def Save(self, obj: Any, filename: Text):
     full_path = self._GetFullPath(filename)
     logging.info('saving to: %s', full_path)
-    pickle.dumps(obj, open(full_path, 'wb'))
+    pickle.dump(obj, open(full_path, 'wb'))
 
   # @Override
   def _LoadImpl(self, filename: Text) -> Any:
     full_path = self._GetFullPath(filename)
     logging.info('reading from: %s', full_path)
-    return pickle.load(full_path)
+    return pickle.load(open(full_path, 'rb'))

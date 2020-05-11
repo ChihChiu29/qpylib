@@ -9,7 +9,7 @@ def Search(
     from_date: Text = None,
     to_date: Text = None,
     number_of_results: int = 10,
-) -> List[GetOldTweets3.models.Tweet.Tweet]:
+) -> List[GetOldTweets3.models.Tweet]:
   """Search tweets.
 
   Reference:
