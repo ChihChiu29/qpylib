@@ -3,8 +3,9 @@
 from typing import Text
 
 import numpy
-from transformers import AutoTokenizer, TFAutoModelForSequenceClassification
+import transformers
 
+from qpylib import logging
 from qpylib import storage
 
 
@@ -26,18 +27,12 @@ class BertBaseMultilingualUncasedSentiment:
     self._Load()
 
   def _Load(self):
-    tokenizer_name = '%s_tokenizer.pickle' % self.BASE_NAME
-    self._tokenizer = self._storage.Load(tokenizer_name)
-    if not self._tokenizer:
-      self._tokenizer = AutoTokenizer.from_pretrained(
-        'nlptown/bert-base-multilingual-uncased-sentiment')
-      self._storage.Save(self._tokenizer, tokenizer_name)
-
-    model_name = '%s_model.pickle' % self.BASE_NAME
-    if not model_name:
-      self._model = TFAutoModelForSequenceClassification.from_pretrained(
-        'nlptown/bert-base-multilingual-uncased-sentiment', from_pt=True)
-      self._storage.Save(self._model, tokenizer_name)
+    logging.warning('Will take ~2 min for the initial download (2 GB)')
+    self._tokenizer = transformers.AutoTokenizer.from_pretrained(
+      'nlptown/bert-base-multilingual-uncased-sentiment')
+    self._model = (
+      transformers.TFAutoModelForSequenceClassification.from_pretrained(
+        'nlptown/bert-base-multilingual-uncased-sentiment', from_pt=True))
 
   def Classify(self, content: Text) -> int:
     """Classifies some content as a 0-4 value (4 means best)."""
