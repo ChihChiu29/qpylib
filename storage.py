@@ -4,11 +4,13 @@ We have preferred directories for data files for reading/writing. This module
 is to help enforce the read/write best practice. Whenever you read/write a data
 file, use this module. For directory convention see tools.settings module.
 """
-
+import abc
 import os
-import pandas
 import pathlib
+import pickle
 import sqlite3
+
+import pandas
 
 from qpylib import logging
 from qpylib import storage
@@ -229,33 +231,71 @@ def OpenSQLiteConnection(
     sqlite3.connect(database_file_path), debug_print=debug_print)
 
 
-class DataFrameStorage:
-  """Helps to read and save data frames for a given project."""
-  
+class AbstractStorage(abc.ABC):
+  """Base class for saving and loading data to files."""
+
   def __init__(self, project_name: Text):
     self._project = project_name
-    
+
     pathlib.Path(storage.GetDataDirPath(self._project)).mkdir(
-        parents=True, exist_ok=True)
-    
-  def Save(self, df: pandas.DataFrame, filename: Text):
-    full_path = self._GetFullPath(filename)
-    logging.info('saving to: %s', full_path)
-    df.to_json(full_path)
-    
-  
-  def Load(self, filename: Text) -> pandas.DataFrame:
-    full_path = self._GetFullPath(filename)
-    logging.info('reading from: %s', full_path)
-    return pandas.read_json(full_path)
-  
-  
+      parents=True, exist_ok=True)
+
+  @abc.abstractmethod
+  def Save(self, data: Any, filename: Text):
+    """Save action; subclass can override data type."""
+    pass
+
+  def Load(self, filename: Text) -> Any:
+    """Loads from an existing file or None; type depends on subclass."""
+    if self.Exists(filename):
+      return self._LoadImpl(filename)
+    return None
+
+  @abc.abstractmethod
+  def _LoadImpl(self, filename: Text) -> Any:
+    """Actual implementation of the load function."""
+    pass
+
   def Exists(self, filename: Text) -> bool:
     full_path = self._GetFullPath(filename)
     result = os.path.exists(full_path)
     logging.info('%s exists: %s', full_path, result)
     return result
 
-
   def _GetFullPath(self, filename: Text) -> Text:
     return storage.GetDataDirPath(os.path.join(self._project, filename))
+
+
+class DataFrameStorage(AbstractStorage):
+  """Helps to save and load data frames for a given project."""
+
+  def __init__(self, project_name: Text):
+    super().__init__(project_name)
+
+  # @Override
+  def Save(self, df: pandas.DataFrame, filename: Text):
+    full_path = self._GetFullPath(filename)
+    logging.info('saving to: %s', full_path)
+    df.to_json(full_path)
+
+  # @Override
+  def _LoadImpl(self, filename: Text) -> pandas.DataFrame:
+    full_path = self._GetFullPath(filename)
+    logging.info('reading from: %s', full_path)
+    return pandas.read_json(full_path)
+
+
+class PickleStorage(AbstractStorage):
+  """Helps to save and load objects using pickle."""
+
+  # @Override
+  def Save(self, obj: Any, filename: Text):
+    full_path = self._GetFullPath(filename)
+    logging.info('saving to: %s', full_path)
+    pickle.dumps(obj, open(full_path, 'wb'))
+
+  # @Override
+  def _LoadImpl(self, filename: Text) -> Any:
+    full_path = self._GetFullPath(filename)
+    logging.info('reading from: %s', full_path)
+    return pickle.load(full_path)
