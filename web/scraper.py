@@ -1,4 +1,8 @@
-"""Generic article fetcher."""
+"""Generic article fetcher.
+
+Related references:
+* https://github.com/juanluisrto/stock-prediction-nlp/blob/master/google-news-scraping.ipynb
+"""
 from typing import Text
 
 from newsplease import NewsPlease
