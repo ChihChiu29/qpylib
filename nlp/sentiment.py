@@ -49,6 +49,10 @@ class BertBaseMultilingualUncasedSentiment:
 
     See `Classify` for reference.
 
+    Note: we cannot implement this with a single `Classify` call because the
+    sizes of the tokenized sentences are different, and padding them with 0s
+    doesn't work either because that changes the score.
+
     Args:
       contents: the contents to classify.
       log_progress_every_number_of_steps: print out a progress log every this
