@@ -3,6 +3,8 @@ from typing import List, Text
 
 import GetOldTweets3
 
+DATE_FORMAT = '%Y-%m-%d'
+
 
 def Search(
     query: Text,
@@ -42,8 +44,8 @@ def Search(
   """
   tweetCriteria = GetOldTweets3.manager.TweetCriteria().setQuerySearch(query)
   if from_date:
-    tweetCriteria.setSince("2015-05-01")
+    tweetCriteria.setSince(from_date.strftime(DATE_FORMAT))
   if to_date:
-    tweetCriteria.setUntil("2015-09-30")
+    tweetCriteria.setUntil(to_date.strftime(DATE_FORMAT))
   tweetCriteria.setMaxTweets(number_of_results)
   return GetOldTweets3.manager.TweetManager.getTweets(tweetCriteria)
