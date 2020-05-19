@@ -20,7 +20,6 @@ class ISentimentClassifier(abc.ABC):
   def ClassifyMultiple(
       self,
       contents: Iterable[Text],
-      log_progress_every_number_of_steps: int = 100,
   ) -> Iterable[int]:
     """Classifiers multiple contents into a vector of 0-4 values."""
     pass
@@ -60,7 +59,6 @@ class BertBaseMultilingualUncasedSentiment(ISentimentClassifier):
   def ClassifyMultiple(
       self,
       contents: Iterable[Text],
-      log_progress_every_number_of_steps: int = 100,
   ) -> Iterable[int]:
     """Classifies multiple content texts.
 
@@ -72,16 +70,10 @@ class BertBaseMultilingualUncasedSentiment(ISentimentClassifier):
 
     Args:
       contents: the contents to classify.
-      log_progress_every_number_of_steps: print out a progress log every this
-        number of steps.
 
     Returns:
       Returns a 1d array for the classifier results. Each element is an integer
       between 0-4, with 4 means the best.
     """
-    count = 0
     for c in contents:
-      if count % log_progress_every_number_of_steps == 0:
-        logging.info('[ClassifyMultiple] progress count: %s', count)
       yield self.Classify(c)
-      count += 1
