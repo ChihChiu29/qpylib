@@ -1,5 +1,5 @@
 """Helper functions for sentiment analysis."""
-
+import abc
 from typing import Text, Iterable
 
 import numpy
@@ -9,7 +9,24 @@ from qpylib import logging
 from qpylib import storage
 
 
-class BertBaseMultilingualUncasedSentiment:
+class ISentimentClassifier(abc.ABC):
+
+  @abc.abstractmethod
+  def Classify(self, content: Text) -> int:
+    """Classifies some content as a 0-4 value (4 means best)."""
+    pass
+
+  @abc.abstractmethod
+  def ClassifyMultiple(
+      self,
+      contents: Iterable[Text],
+      log_progress_every_number_of_steps: int = 100,
+  ) -> Iterable[int]:
+    """Classifiers multiple contents into a vector of 0-4 values."""
+    pass
+
+
+class BertBaseMultilingualUncasedSentiment(ISentimentClassifier):
   """A BERT based sentiment classifier.
 
   Reference:

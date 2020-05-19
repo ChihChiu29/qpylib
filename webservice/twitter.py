@@ -1,4 +1,5 @@
 """Provides helpers interacting with Twitter."""
+import datetime
 from typing import List, Text
 
 import GetOldTweets3
@@ -8,8 +9,8 @@ DATE_FORMAT = '%Y-%m-%d'
 
 def Search(
     query: Text,
-    from_date: Text = None,
-    to_date: Text = None,
+    from_date: datetime.datetime = None,
+    to_date: datetime.datetime = None,
     number_of_results: int = 10,
 ) -> List[GetOldTweets3.models.Tweet]:
   """Search tweets.
