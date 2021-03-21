@@ -5,6 +5,8 @@ import pandas
 from typing import Dict, Iterable, List, Text
 
 import nest_asyncio
+# Some references:
+# * https://radiant-brushlands-42789.herokuapp.com/cruizbran.medium.com/getting-started-with-twint-ea49d6454151
 import twint
 
 from qpylib import storage
