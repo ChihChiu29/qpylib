@@ -300,7 +300,7 @@ class StringTable:
     else:
       since_clause = ''
     if key:
-      key_clause = 'AND INSTR(content, %s)' % key
+      key_clause = 'AND INSTR(key, "%s")' % key
     else:
       key_clause = ''
     query = '''
@@ -318,6 +318,14 @@ class StringTable:
       'key_clause': key_clause,
     }
     return self._conn.Execute(query)
+    
+  def Read(
+    self,
+    since: Optional[datetime.datetime] = None,
+    until: Optional[datetime.datetime] = None,
+    key: Optional[str] = None,
+  ) -> List[str]:
+    return list(self.ReadIter(since=since, until=until, key=key))
 
 
 def OpenSQLiteConnection(
