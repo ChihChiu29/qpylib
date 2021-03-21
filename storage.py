@@ -5,6 +5,7 @@ is to help enforce the read/write best practice. Whenever you read/write a data
 file, use this module. For directory convention see tools.settings module.
 """
 import abc
+import datetime
 import os
 import pathlib
 import pickle
@@ -208,6 +209,115 @@ class SQLiteConnection:
     """
     return self.IterRead(
       table_name, columns=columns, other_clauses=other_clauses).fetchall()
+
+
+class StringTable:
+  """Provides an easy way to store strings in a database."""
+  
+  TABLE_NAME = 'StringTable'
+
+  def __init__(
+      self,
+      database_file_name: Optional[str] = None,
+      debug_print: bool = False):
+    """Constructor.
+    
+    Args:
+      storage_name: name of this storage / table.
+    """
+    self._conn = OpenSQLiteConnection(
+        database_file_name, debug_print=debug_print)
+    self._PrepareConnection()
+
+  def Close(self) -> None:
+    """Closes the connection if open."""
+    self._conn.close()
+    
+  def _PrepareConnection(self) -> None:
+    tables = self._conn.ListTables()
+    if self.TABLE_NAME not in tables:
+      self._conn.CreateTable(
+        self.TABLE_NAME,
+        ['ts TIMESTAMP', 'key string', 'content string'])
+
+  def AddValue(
+      self,
+      content: str, 
+      ts: Optional[datetime.datetime] = None,
+      key: Optional[str] = '',
+      commit: bool = True,
+  ) -> None:
+    """Adds a string value to the table.
+    
+    Args:
+      content: the value to add.
+      ts: timestamp for this value, used for search. If not set, the current
+        timestamp is used.
+      key: optional key for the value.
+    """
+    if ts is None:
+      ts = datetime.datetime.now()
+    self._conn._InsertRowImpl(self.TABLE_NAME, [ts.timestamp(), key, content])
+    if commit:
+      self._conn.Commit()
+    
+  def AddValues(self, contents: Iterable[str]) -> None:
+    for content in contents:
+      self.AddValue(content, commit=False)
+    self._comm.Commit()
+    
+  def AddValueMap(self, contents: Dict[str, str]) -> None:
+    for key, value in contents.items():
+      self.AddValue(value, key=key, commit=False)
+    self._comm.Commit()
+    
+  def AddValuesFull(self, contents: Iterable[Tuple[datetime.datetime, str, str]]):
+    for ts, key, value in contents:
+      self.AddValue(value, ts=ts, key=key, commit=False)
+    self._conn.Commit()
+    
+  def ReadIter(
+    self,
+    since: Optional[datetime.datetime] = None,
+    until: Optional[datetime.datetime] = None,
+    key: Optional[str] = None,
+  ) -> Iterable[str]:
+    """Reads multiple values.
+    
+    Args:
+      since: search from this timestamp. If none, search everything.
+      until: search until this timestamp. If none, search until now.
+      key: search values which keys contain this value. Note that this means
+        it is effectively a "subkey", and you can use this to implement "tags".
+    
+    Returns:
+      An iterable of string values.
+    """
+    if until is None:
+      until = datetime.datetime.now()
+    if since:
+      since_clause = 'AND ts >= %s' % since.timestamp()
+    else:
+      since_clause = ''
+    if key:
+      key_clause = 'AND INSTR(content, %s)' % key
+    else:
+      key_clause = ''
+    query = '''
+    SELECT content
+    FROM %(table_name)s
+    WHERE
+      ts <= %(until_timestamp)s
+      %(since_clause)s
+      %(key_clause)s
+    ;
+    ''' % {
+      'table_name': self.TABLE_NAME,
+      'until_timestamp': until.timestamp(),
+      'since_clause': since_clause,
+      'key_clause': key_clause,
+    }
+    return self._conn.Execute(query)
 
 
 def OpenSQLiteConnection(

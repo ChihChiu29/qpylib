@@ -34,6 +34,7 @@ class BertBaseMultilingualUncasedSentiment(ISentimentClassifier):
   """
 
   BASE_NAME = 'BertBaseMultilingualUncasedSentiment'
+  MAX_TOKEN_VECTOR_LENGTH = 256
 
   def __init__(self):
     self._storage = storage.PickleStorage('qpylib/nlp/sentiment')
@@ -52,9 +53,9 @@ class BertBaseMultilingualUncasedSentiment(ISentimentClassifier):
 
   def Classify(self, content: Text) -> int:
     """Classifies some content as a 0-4 value (4 means best)."""
-    self._tokenizer.encode(content)
-    return int(
-      numpy.argmax(self._model.predict([self._tokenizer.encode(content)])))
+    vector = self._tokenizer.encode(
+      content, max_length=self.MAX_TOKEN_VECTOR_LENGTH)
+    return int(numpy.argmax(self._model.predict([vector])))
 
   def ClassifyMultiple(
       self,
