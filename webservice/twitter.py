@@ -1,5 +1,6 @@
 """Provides helpers interacting with Twitter."""
 import datetime
+from dateutil import relativedelta
 import os
 import pandas
 from typing import Dict, Iterable, List, Text
@@ -9,7 +10,9 @@ import nest_asyncio
 # * https://radiant-brushlands-42789.herokuapp.com/cruizbran.medium.com/getting-started-with-twint-ea49d6454151
 import twint
 
+from qpylib import logging
 from qpylib import storage
+from qpylib.date_n_time import date
 
 
 def Search(
@@ -83,3 +86,43 @@ def Search(
   twint.run.Search(c)
   
   return twint.storage.panda.Tweets_df
+
+
+def GetDb(database_file_name: str) -> storage.StringTable:
+  """Returns a database object for storing tweets."""
+  return storage.StringTable('database_file_name')
+  
+
+def DownloadTweets(
+    database_file_name: str,
+    query: str,
+    from_date: datetime.datetime,
+    to_date: datetime.datetime = None,
+    number_of_tweets_per_day: int = 1000,
+) -> storage.StringTable:
+  """Download tweets to a database."""
+  conn = storage.StringTable(database_file_name)
+  if to_date is None:
+    to_date = datetime.datetime.now()
+  
+  for day in date.DaysBetween(from_date, to_date):
+    tweets_df = Search(
+      query,
+      from_date=day,
+      to_date=day + relativedelta.relativedelta(days=1),
+      number_of_results=number_of_tweets_per_day,
+    )
+    logging.vlog(
+        2,
+        'Processed day %s: downloaded %d tweets',
+        day,
+        len(tweets_df))
+    values = []
+    for index, row in tweets_df.iterrows():
+      values.append((
+          datetime.datetime.fromtimestamp(row['created_at'] / 1000),
+          '',
+          row['tweet'],
+        ))
+    conn.AddValuesFull(values)
+  return conn

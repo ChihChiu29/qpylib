@@ -85,7 +85,5 @@ def DaysBetween(
     start: datetime.datetime,
     end: datetime.datetime) -> t.Iterable[datetime.datetime]:
   """List days between two datetimes, including "end" but not "start"."""
-  return rrule.rrule(
-    rrule.DAILY,
-    dtstart=start.date() + relativedelta.relativedelta(days=1),
-    until=end.date())
+  # Get next day: start.date() + relativedelta.relativedelta(days=1),
+  return rrule.rrule(rrule.DAILY, dtstart=start.date(), until=end.date())
